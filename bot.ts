@@ -4,14 +4,14 @@ import { botToken, joinCheckId, joinCheckEnabled } from './config.ts';
 export const bot = new Bot(botToken);
 
 // custom filters
-const pm = bot.filter((ctx: Context) => ctx.chat?.type === 'private');
-const joinCheck = bot.filter(async (ctx: Context) => {
+const joinCheckAndPm = bot.filter(async (ctx: Context) => {
   // if joincheck is not enabled, return true
   if (!joinCheckEnabled) {
     return true;
   }
 
   // store const's
+  const isPrivate = ctx.chat?.type === 'private';
   const userId = Number(ctx.from?.id);
   const member = await ctx.api
     .getChatMember(joinCheckId, userId)
@@ -34,21 +34,33 @@ const joinCheck = bot.filter(async (ctx: Context) => {
     });
   }
 
-  return member;
+  return member && isPrivate;
 });
 
-pm.command(
+joinCheckAndPm.command(
   'start',
-  async (ctx: Context) => await ctx.reply('Welcome! Up and running.'),
+  async (ctx: Context) =>
+    await ctx.reply(`Hello ${ctx.from?.first_name}
+  
+I'm ${ctx.me?.first_name} and I can send the file that you send me, without the forwarded from tag!`),
 );
-pm.command(
+
+joinCheckAndPm.command(
+  'help',
+  async (ctx: Context) =>
+    await ctx.reply(`This bot will send back the document/file/pic/video/image/text that you forward, back to you, so that the forwarded from tag is removed and it looks like it's forwarded from the bot!!
+
+  Made with ❤️ by @DivideProjects`),
+);
+
+joinCheckAndPm.command(
   'ping',
   async (ctx: Context) => await ctx.reply(`Pong! ${new Date()} ${Date.now()}`),
 );
-pm.on([':media', ':file']).on(
-  ':forward_date',
-  async (ctx: Context) => await ctx.copyMessage(Number(ctx.chat?.id)),
-);
-joinCheck.command('works', async (ctx: Context) => {
-  await ctx.reply('Works!');
-});
+
+joinCheckAndPm
+  .on([':media', ':file'])
+  .on(
+    ':forward_date',
+    async (ctx: Context) => await ctx.copyMessage(Number(ctx.chat?.id)),
+  );
