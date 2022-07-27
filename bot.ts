@@ -4,7 +4,7 @@ import { botToken, joinCheckId, joinCheckEnabled } from './config.ts';
 export const bot = new Bot(botToken);
 
 // custom filters
-const joinCheckAndPm = bot.filter(async (ctx: Context) => {
+const decorator = bot.filter(async (ctx: Context) => {
   // if joincheck is not enabled, return true
   if (!joinCheckEnabled) {
     return true;
@@ -33,7 +33,7 @@ const joinCheckAndPm = bot.filter(async (ctx: Context) => {
   return isMember && isPrivate;
 });
 
-joinCheckAndPm.command(
+decorator.command(
   'start',
   async (ctx: Context) =>
     await ctx.reply(`Hello ${ctx.from?.first_name}
@@ -41,7 +41,7 @@ joinCheckAndPm.command(
 I'm ${ctx.me?.first_name} and I can send the file that you send me, without the forwarded from tag!`),
 );
 
-joinCheckAndPm.command(
+decorator.command(
   'help',
   async (ctx: Context) =>
     await ctx.reply(`This bot will send back the document/file/pic/video/image/text that you forward, back to you, so that the forwarded from tag is removed and it looks like it's forwarded from the bot!!
@@ -49,12 +49,12 @@ joinCheckAndPm.command(
   Made with ❤️ by @DivideProjects`),
 );
 
-joinCheckAndPm.command(
+decorator.command(
   'ping',
   async (ctx: Context) => await ctx.reply(`Pong! ${new Date()} ${Date.now()}`),
 );
 
-joinCheckAndPm
+decorator
   .on([':media', ':file'])
   .on(
     ':forward_date',
