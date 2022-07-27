@@ -13,18 +13,14 @@ const joinCheckAndPm = bot.filter(async (ctx: Context) => {
   // store const's
   const isPrivate = ctx.chat?.type === 'private';
   const userId = Number(ctx.from?.id);
-  const member = await ctx.api
-    .getChatMember(joinCheckId, userId)
-    .then((member) => {
-      return (
-        member.status === 'member' ||
-        member.status === 'creator' ||
-        member.status === 'administrator'
-      );
-    });
+  const member = await ctx.api.getChatMember(joinCheckId, userId);
+  const isMember =
+    member.status === 'member' ||
+    member.status === 'creator' ||
+    member.status === 'administrator';
 
   // if user is not a member, also send a message to ask user to join channel
-  if (!member) {
+  if (!isMember) {
     const joinChannel = 'DivideProjects';
     await ctx.reply(`You have to join my channel @${joinChannel} to use me!`, {
       reply_markup: new InlineKeyboard().url(
@@ -34,7 +30,7 @@ const joinCheckAndPm = bot.filter(async (ctx: Context) => {
     });
   }
 
-  return member && isPrivate;
+  return isMember && isPrivate;
 });
 
 joinCheckAndPm.command(
